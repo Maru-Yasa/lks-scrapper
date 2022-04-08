@@ -38,6 +38,18 @@ Route::group(['prefix' => 'v1'], function() {
 
     });
 
+    Route::group(['prefix' => 'book'], function(){
+        Route::get('/','App\Http\Controllers\API\BookController@getAll');
+        Route::get('/{id}','App\Http\Controllers\API\BookController@getById');
+
+        //Required authorization
+        Route::group(['middleware' => 'auth:sanctum'], function(){
+            Route::post('/update','App\Http\Controllers\API\BookController@update');
+            Route::delete('/delete','App\Http\Controllers\API\BookController@delete');
+        });
+
+    });
+
     // /auth/* route
     Route::group(['prefix' => 'auth'], function(){
         // Not required authorization

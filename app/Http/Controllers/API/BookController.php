@@ -26,22 +26,18 @@ class BookController extends Controller
         ],200);
     }
 
-    public function getById(Request $req)
+    public function getById(Request $req, Int $id)
     {
-        $validator = Validator::make($req->all(),[
-            'id' => 'required'
-        ]);
-
-        if ($validator->fails()) {
+        if (!$id) {
             return response()->json([
                 'status' => "error",
                 'data' => [],
-                'msg' => $validator->errors(),
+                'msg' => "id book not found",
             ], 400);  
         }
 
         try {
-            $book = Book::all()->where('id',$req->id)->firstOrFail();
+            $book = Book::all()->where('id',$id)->firstOrFail();
             return response()->json([
                 'status' => "success",
                 'data' => $book,
@@ -51,7 +47,7 @@ class BookController extends Controller
             return response()->json([
                 'status' => "error",
                 'data' => [],
-                'msg' => "Book with id $req->id not found",
+                'msg' => "Book with id $id not found",
             ], 400);
         }   
 
@@ -101,7 +97,16 @@ class BookController extends Controller
         }
 
         try {
-            //code...
+
+            $book = Book::all()->where('id',$req->id)->firstOrFail();
+            $book->update($req->except(['id']));
+
+            return response()->json([
+                'status' => "success",
+                'data' => $book,
+                'msg' => "Successfuly update book with id $book->id",
+            ],200);
+
         } catch (ItemNotFoundException $e) {
             return response()->json([
                 'status' => "error",
@@ -109,8 +114,37 @@ class BookController extends Controller
                 'msg' => "Config with id $req->id not found",
             ], 400);
         }
+    }
 
+    public function delete(Request $req)
+    {
+        $validator = Validator::make($req->all(),[
+            'id' => "required"
+        ]);
 
+        if($validator->fails()){
+            return response()->json([
+                'status' => "error",
+                'data' => [],
+                'msg' => $validator->errors(),
+            ], 400); 
+        }
+
+        try {
+            $book = Book::all()->where('id',$req->id)->firstOrFail();
+            $book->delete();
+            return response()->json([
+                'status' => "success",
+                'data' => '',
+                'msg' => "Successfuly delete book with id $book->id",
+            ],200);
+        } catch (ItemNotFoundException $th) {
+            return response()->json([
+                'status' => "error",
+                'data' => [],
+                'msg' => "Config with id $req->id not found",
+            ], 400);        
+        }
 
     }
 
